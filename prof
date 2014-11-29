@@ -1,0 +1,112 @@
+#!/bin/bash
+
+# Profiling script; takes as input binary location and gp binary location and their arguments
+
+# 1=targetname; 2=pg-bin; 3=g-bin; 4+= arguments/inputs
+
+PINTOOLDIR="$PIN_ROOT/source/tools/MyPinTool/obj-intel64"
+
+TARGETNAME=$1
+PG_EXEC=$2
+EXEC=$3
+
+rm $TARGETNAME.*.results 2> /dev/null
+
+shift 3
+echo "$@" 
+
+#getting real execution time
+(time $EXEC "$@") &> $TARGETNAME.stat.results
+
+# prepare for gprof
+gcc -shared -fPIC gprof-helper.c -o gprof-helper.so -lpthread -ldl
+LD_PRELOAD=./gprof-helper.so $PG_EXEC "$@"
+mv gmon.out $TARGETNAME.gmon.out.results
+gprof -b $PG_EXEC $TARGETNAME.gmon.out.results > $TARGETNAME.gprof.results
+
+# run PIN
+pin -t $PINTOOLDIR/ThreadTimes.so -- $EXEC "$@"
+mv threadtime.out $TARGETNAME.pin.results
+
+# run valgrind cachegrind
+echo $EXEC "$@"
+valgrind --tool=cachegrind --branch-sim=yes $EXEC "$@" 2> $TARGETNAME.cachegrind.basic.results
+x=`echo cachegrind.out.*`
+#echo $x
+#exit 0
+y="$TARGETNAME.$x.results"
+mv $x $y
+
+cg_annotate --auto=yes $y > $TARGETNAME.cachegrind.detailed.results
+
+# run valgrind callgrind
+valgrind --tool=callgrind --cache-sim=yes $EXEC "$@" 2> $TARGETNAME.callgrind.basic.results
+#valgrind --tool=callgrind $EXEC "$@" 2> $TARGETNAME.callgrind.basic.results
+x=`echo callgrind.out.*`
+
+y="$TARGETNAME.$x.results"
+mv $x $y
+callgrind_annotate --tree=both $y > $TARGETNAME.callgrind.detailed.results
+
+
+#Parsing output
+echo "==================================" >> $TARGETNAME.final.results
+echo "Section 1 - Summary" >>  $TARGETNAME.final.results
+echo "==================================" >> $TARGETNAME.final.results
+echo "" >> $TARGETNAME.final.results
+echo "Total execution time" >> $TARGETNAME.final.results
+echo "--------------------" >> $TARGETNAME.final.results
+sed -n '/real/p'  $TARGETNAME.stat.results | cut -f2 >>  $TARGETNAME.final.results
+echo "" >> $TARGETNAME.final.results
+echo "Total number of instructions" >> $TARGETNAME.final.results
+echo "--------------------" >> $TARGETNAME.final.results
+grep 'I   refs:' $TARGETNAME.cachegrind.basic.results | awk '{print $4}' >> $TARGETNAME.final.results
+echo "" >> $TARGETNAME.final.results
+echo "Thread execution time" >>  $TARGETNAME.final.results
+echo "--------------------" >> $TARGETNAME.final.results
+firstLine=`head -1 $TARGETNAME.pin.results`
+echo "$firstLine" >> $TARGETNAME.final.results
+sed '1d' $TARGETNAME.pin.results  | sort -k2 -n -r >> $TARGETNAME.final.results
+echo "" >> $TARGETNAME.final.results
+
+echo "==================================" >> $TARGETNAME.final.results
+echo "Section 2 - Cache information" >> $TARGETNAME.final.results
+echo "==================================" >> $TARGETNAME.final.results
+echo "" >> $TARGETNAME.final.results
+echo "Cache data" >> $TARGETNAME.final.results
+echo "--------------------" >> $TARGETNAME.final.results
+grep 'LL ' $TARGETNAME.cachegrind.basic.results | awk '{$1=""; print $0}' | sed 's/^\s//' >> $TARGETNAME.final.results
+
+echo ""  >> $TARGETNAME.final.results
+totalMisses=`cg_annotate --auto=yes --show=DLmr --sort=DLmr $TARGETNAME.cachegrind.out.*  | sed -n '/Auto-annotation/,$p' | head -6 | tail -1 | awk '{print $1}'`
+echo "Total number of LL cache misses (DLmr): $totalMisses" >> $TARGETNAME.final.results
+echo ""  >> $TARGETNAME.final.results
+cg_annotate --auto=yes --show=DLmr --sort=DLmr $TARGETNAME.cachegrind.out.*  | sed -n '/Auto-annotation/,$p' | sed 1,8d | sed 2d  >> $TARGETNAME.final.results
+echo ""  >> $TARGETNAME.final.results
+echo "Branch mispredictions" >> $TARGETNAME.final.results
+echo "--------------------" >> $TARGETNAME.final.results
+tail -3 $TARGETNAME.cachegrind.basic.results |  awk '{$1=""; print $0}' | sed 's/^\s//' >> $TARGETNAME.final.results
+echo ""  >> $TARGETNAME.final.results
+
+echo "==================================" >> $TARGETNAME.final.results
+echo "Section 3 - Call graph details" >> $TARGETNAME.final.results
+echo "==================================" >> $TARGETNAME.final.results
+echo "Call Graph Info - Cache" >> $TARGETNAME.final.results
+echo "--------------------" >> $TARGETNAME.final.results
+totalInstr=`callgrind_annotate --tree=both --show=Ir,DLmr --sort=DLmr,Ir $TARGETNAME.callgrind.out.* | sed -n '/Auto-annotation/,$p' | sed 1d | head -6 | tail -2 | awk '{print $1}'`
+echo "Total number of instructions (Ir): $totalInstr" >> $TARGETNAME.final.results
+echo ""  >> $TARGETNAME.final.results
+callgrind_annotate --tree=both --show=Ir,DLmr --sort=DLmr,Ir $TARGETNAME.callgrind.out.* | sed -n '/Auto-annotation/,$p' | sed 1,8d | sed 2d | sed 3d | sed 2d  >> $TARGETNAME.final.results
+echo ""  >> $TARGETNAME.final.results
+echo "Call Graph Info - Functions" >> $TARGETNAME.final.results
+echo "--------------------" >> $TARGETNAME.final.results
+echo "Flat Profile:" >> $TARGETNAME.final.results
+echo "" >> $TARGETNAME.final.results
+sed -n '/cumulative/,/Call graph/p' $TARGETNAME.gprof.results | sed \$d >> $TARGETNAME.final.results
+echo "" >> $TARGETNAME.final.results
+echo "Call Graph:" >> $TARGETNAME.final.results
+echo "" >> $TARGETNAME.final.results
+sed -n '/index % time/,/Index by function name/p' $TARGETNAME.gprof.results | sed \$d >> $TARGETNAME.final.results
+
+echo "" >> $TARGETNAME.final.results
+ 

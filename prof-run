@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# sets up environment and calls prof script with the right arguments; ie. batch file
+NTHREADS=1
+
+PIN_ROOT=$HOME/multicore/project/pin-2.14-67254-gcc.4.4.7-linux
+# PATH=$PIN_ROOT:$HOME/multicore/project/valgrind-3.10.1/coregrind:$PATH
+# VALGRIND_LIB=/home/cpp270/multicore/project/valgrind-3.10.1/.in_place
+PATH=$PIN_ROOT:$PATH
+
+
+export PATH
+export PIN_ROOT
+# export VALGRIND_LIB
+
+PARSEC_DIR=$HOME/multicore/project/parsec-2.1/pkgs/apps
+
+PTHREADS_BIN=/inst/amd64-linux.gcc-pthreads-g/bin
+PTHREADS_GP_BIN=/inst/amd64-linux.gcc-pthreads-gp/bin
+
+INPUT_DIR=/inputs
+
+if [[ $1 == "all" || $1 == "blackscholes" ]]
+then
+    TARGETNAME="blackscholes"
+    echo "starting $TARGETNAME"
+    ./prof "$TARGETNAME" "$PARSEC_DIR/${TARGETNAME}${PTHREADS_GP_BIN}/$TARGETNAME" \
+    "$PARSEC_DIR/${TARGETNAME}${PTHREADS_BIN}/$TARGETNAME" \
+    $NTHREADS "$PARSEC_DIR/${TARGETNAME}${INPUT_DIR}/in_4.txt" $TARGETNAME.out.results
+fi
+
+if [[ $1 == "all" || $1 == "bodytrack" ]]
+then
+    TARGETNAME="blackscholes"
+    echo "starting $TARGETNAME"
+fi
+
+if [[ $1 == "all" || $1 == "facesim" ]]
+then
+    TARGETNAME="facesim"
+    echo "starting $TARGETNAME"
+fi
+
+if [[ $1 == "all" || $1 == "ferret" ]]
+then
+    TARGETNAME="ferret"
+    echo "starting $TARGETNAME"
+fi
+
+if [[ $1 == "all" || $1 == "raytrace" ]]
+then
+    TARGETNAME="raytrace"
+    echo "starting $TARGETNAME"
+fi
+
+if [[ $1 == "all" || $1 == "tsm" ]]
+then
+    TARGETNAME="tsm"
+    echo "starting $TARGETNAME"
+    ./prof "$TARGETNAME" "$HOME/multicore/Lab3/parallel-gp" "$HOME/multicore/Lab3/parallel" "$HOME/multicore/Lab3/cities10.txt" 4
+fi
