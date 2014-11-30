@@ -19,38 +19,47 @@ PTHREADS_BIN=/inst/amd64-linux.gcc-pthreads-g/bin
 PTHREADS_GP_BIN=/inst/amd64-linux.gcc-pthreads-gp/bin
 
 INPUT_DIR=/inputs
+INPUT_FILE=in_4.txt
+
+function parsec_run(){
+    ./prof "$TARGETNAME" "$PARSEC_DIR/${TARGETNAME}${PTHREADS_GP_BIN}/$TARGETNAME" \
+    "$PARSEC_DIR/${TARGETNAME}${PTHREADS_BIN}/$TARGETNAME" \
+    $NTHREADS "$PARSEC_DIR/${TARGETNAME}${INPUT_DIR}/$INPUT_FILE" $TARGETNAME.out.results
+}
 
 if [[ $1 == "all" || $1 == "blackscholes" ]]
 then
     TARGETNAME="blackscholes"
     echo "starting $TARGETNAME"
-    ./prof "$TARGETNAME" "$PARSEC_DIR/${TARGETNAME}${PTHREADS_GP_BIN}/$TARGETNAME" \
-    "$PARSEC_DIR/${TARGETNAME}${PTHREADS_BIN}/$TARGETNAME" \
-    $NTHREADS "$PARSEC_DIR/${TARGETNAME}${INPUT_DIR}/in_4.txt" $TARGETNAME.out.results
+    parsec_run
 fi
 
 if [[ $1 == "all" || $1 == "bodytrack" ]]
 then
-    TARGETNAME="blackscholes"
+    TARGETNAME="bodytrack"
     echo "starting $TARGETNAME"
+    parsec_run
 fi
 
 if [[ $1 == "all" || $1 == "facesim" ]]
 then
     TARGETNAME="facesim"
     echo "starting $TARGETNAME"
+    parsec_run
 fi
 
 if [[ $1 == "all" || $1 == "ferret" ]]
 then
     TARGETNAME="ferret"
     echo "starting $TARGETNAME"
+    parsec_run
 fi
 
 if [[ $1 == "all" || $1 == "raytrace" ]]
 then
     TARGETNAME="raytrace"
     echo "starting $TARGETNAME"
+    parsec_run
 fi
 
 if [[ $1 == "all" || $1 == "tsm" ]]

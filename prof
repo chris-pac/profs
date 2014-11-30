@@ -4,6 +4,21 @@
 
 # 1=targetname; 2=pg-bin; 3=g-bin; 4+= arguments/inputs
 
+if [ -z "$PIN_ROOT" ]; then
+    echo "Please set environment variable PIN_ROOT to pin's location"
+    exit 1
+fi
+
+if ! type pin &> /dev/null ; then
+    echo "pin command not found. Please add its location to PATH"
+    exit 1
+fi
+
+if ! type valgrind &> /dev/null ; then
+    echo "valgrind command not found. Please add its location to PATH"     
+    exit 1
+fi
+
 PINTOOLDIR="$PIN_ROOT/source/tools/MyPinTool/obj-intel64"
 
 TARGETNAME=$1
@@ -13,38 +28,35 @@ EXEC=$3
 rm $TARGETNAME.*.results 2> /dev/null
 
 shift 3
-echo "$@" 
 
 #getting real execution time
-(time $EXEC "$@") &> $TARGETNAME.stat.results
+(time $EXEC "$@" > $TARGETNAME.stdout.results) &> $TARGETNAME.stat.results
 
 # prepare for gprof
 gcc -shared -fPIC gprof-helper.c -o gprof-helper.so -lpthread -ldl
-LD_PRELOAD=./gprof-helper.so $PG_EXEC "$@"
+LD_PRELOAD=./gprof-helper.so $PG_EXEC "$@" &> /dev/null
 mv gmon.out $TARGETNAME.gmon.out.results
 gprof -b $PG_EXEC $TARGETNAME.gmon.out.results > $TARGETNAME.gprof.results
 
 # run PIN
-pin -t $PINTOOLDIR/ThreadTimes.so -- $EXEC "$@"
+pin -t $PINTOOLDIR/ThreadTimes.so -- $EXEC "$@" > /dev/null
 mv threadtime.out $TARGETNAME.pin.results
 
 # run valgrind cachegrind
-echo $EXEC "$@"
-valgrind --tool=cachegrind --branch-sim=yes $EXEC "$@" 2> $TARGETNAME.cachegrind.basic.results
+#echo $EXEC "$@"
+valgrind --tool=cachegrind --branch-sim=yes $EXEC "$@" 2> $TARGETNAME.cachegrind.basic.results > /dev/null
 x=`echo cachegrind.out.*`
-#echo $x
-#exit 0
 y="$TARGETNAME.$x.results"
 mv $x $y
 
 cg_annotate --auto=yes $y > $TARGETNAME.cachegrind.detailed.results
 
 # run valgrind callgrind
-valgrind --tool=callgrind --cache-sim=yes --separate-threads=yes $EXEC "$@" 2> /dev/null
+valgrind --tool=callgrind --cache-sim=yes --separate-threads=yes $EXEC "$@" &> /dev/null
 head -20 callgrind.out.*-* | awk '$1 ~ /summary:|thread:/ { if ($1=="thread:") {x=$2} if ($1=="summary:") {print x,$2,$9,$10}}' | sort -k2 -nr > $TARGETNAME.cachegrind.thread.basic.results
 rm -f callgrind.out.*
 
-valgrind --tool=callgrind --cache-sim=yes $EXEC "$@" 2> $TARGETNAME.callgrind.basic.results
+valgrind --tool=callgrind --cache-sim=yes $EXEC "$@" 2> $TARGETNAME.callgrind.basic.results > /dev/null
 #valgrind --tool=callgrind $EXEC "$@" 2> $TARGETNAME.callgrind.basic.results
 x=`echo callgrind.out.*`
 
