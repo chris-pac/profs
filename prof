@@ -25,8 +25,7 @@ TARGETNAME=$1
 PG_EXEC=$2
 EXEC=$3
 
-rm $TARGETNAME.*.results 2> /dev/null
-rm $TARGETNAME.html 2> /dev/null
+rm -rf $TARGETNAME 2> /dev/null
 
 shift 3
 
@@ -202,11 +201,11 @@ echo "" >> $HTMLFILENAME
 sed -n '/index % time/,/Index by function name/p' $TARGETNAME.gprof.results | sed \$d >> $HTMLFILENAME
 echo "</p></div>" >> $HTMLFILENAME
 
-mkdir $TARGETNAME
-mv $TARGETNAME.* $TARGETNAME
-mv $TARGETNAME/$TARGETNAME.results .
-mv $TARGETNAME/$TARGETNAME.temp.html .
-
 ./charts.py $TARGETNAME
 
-rm $TARGETNAME/$TARGETNAME.temp.html .
+mkdir $TARGETNAME
+rm $TARGETNAME.temp.html
+
+mv $TARGETNAME.* $TARGETNAME
+mv $TARGETNAME/$TARGETNAME.results .
+mv $TARGETNAME/$TARGETNAME.html .
