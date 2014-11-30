@@ -26,6 +26,7 @@ PG_EXEC=$2
 EXEC=$3
 
 rm $TARGETNAME.*.results 2> /dev/null
+rm $TARGETNAME.html 2> /dev/null
 
 shift 3
 
