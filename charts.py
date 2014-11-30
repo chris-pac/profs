@@ -19,8 +19,7 @@ for line in file1:
 	temp = line.split()
 	thread.append("Thread " + str(temp[0]))
 	runtime.append(float(temp[1]))
-	locktime.append(float(temp[1]*(float(temp[2])/100)
-
+	locktime.append(float(temp[1])*(float(temp[2]))/100)
 
 file1.close()
 
