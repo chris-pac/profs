@@ -144,7 +144,7 @@ grep 'I   refs:' $TARGETNAME.cachegrind.basic.results | awk '{print $4}' >> $HTM
 echo "</p>" >>  $HTMLFILENAME
 
 echo "<h5 style=\"margin:0;color:rgb(248, 161, 63);\"><u>Thread execution time</u></h5>" >>  $HTMLFILENAME
-echo "<p style=\"margin-top:6px\">" >> $HTMLFILENAME
+echo "<p style=\"white-space: pre-wrap; margin-top:-10px;\">" >> $HTMLFILENAME
 firstLine=`head -1 $TARGETNAME.pin.results`
 echo "$firstLine" >> $HTMLFILENAME
 sed '1d' $TARGETNAME.pin.results  | sort -k2 -n -r >> $HTMLFILENAME
@@ -164,6 +164,7 @@ echo "Total number of LL cache misses - reads (DLmr) and writes (DLmw): $totalMi
 echo "</p>" >> $HTMLFILENAME
 
 echo "<h5 style=\"margin:0;color:rgb(248, 161, 63);\"><u>Branch mispredictions</u></h5>" >> $HTMLFILENAME
+echo "<p style=\"white-space: pre-wrap; margin-top:-10px;\"> " >> $HTMLFILENAME
 cg_annotate --auto=yes --show=DLmr,DLmw --sort=DLmr,DLmw $TARGETNAME.cachegrind.out.*  | sed -n '/Auto-annotation/,$p' | sed 1,8d | sed 2d  >> $HTMLFILENAME
 tail -3 $TARGETNAME.cachegrind.basic.results |  awk '{$1=""; print $0}' | sed 's/^\s//' >> $HTMLFILENAME
 echo "</p></div><br>"  >> $HTMLFILENAME
