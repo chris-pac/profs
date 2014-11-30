@@ -53,7 +53,7 @@ cg_annotate --auto=yes $y > $TARGETNAME.cachegrind.detailed.results
 
 # run valgrind callgrind
 valgrind --tool=callgrind --cache-sim=yes --separate-threads=yes $EXEC "$@" &> /dev/null
-head -20 callgrind.out.*-* | awk '$1 ~ /summary:|thread:/ { if ($1=="thread:") {x=$2} if ($1=="summary:") {print x,$2,$9,$10}}' | sort -k2 -nr > $TARGETNAME.cachegrind.thread.basic.results
+head -20 callgrind.out.*-* | awk 'BEGIN { OFS='\t' } $1 ~ /summary:|thread:/ { if ($1=="thread:") {x=$2} if ($1=="summary:") {print x,$2,$9,$10}}' | sort -k2 -nr > $TARGETNAME.cachegrind.thread.basic.results
 rm -f callgrind.out.*
 
 valgrind --tool=callgrind --cache-sim=yes $EXEC "$@" 2> $TARGETNAME.callgrind.basic.results > /dev/null
@@ -98,6 +98,7 @@ totalMisses=`cg_annotate --auto=yes --show=DLmr,DLmw --sort=DLmr,DLmw $TARGETNAM
 echo "" >>  $TARGETNAME.final.results
 echo "Thread  Instr  Read Misses   Write Misses" >> $TARGETNAME.final.results
 cat  $TARGETNAME.cachegrind.thread.basic.results >> $TARGETNAME.final.results
+echo ""  >> $TARGETNAME.final.results
 echo "Total number of LL cache misses - reads (DLmr) and writes (DLmw): $totalMisses" >> $TARGETNAME.final.results
 echo ""  >> $TARGETNAME.final.results
 cg_annotate --auto=yes --show=DLmr,DLmw --sort=DLmr,DLmw $TARGETNAME.cachegrind.out.*  | sed -n '/Auto-annotation/,$p' | sed 1,8d | sed 2d  >> $TARGETNAME.final.results
