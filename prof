@@ -94,10 +94,10 @@ echo "--------------------" >> $TARGETNAME.final.results
 grep 'LL ' $TARGETNAME.cachegrind.basic.results | awk '{$1=""; print $0}' | sed 's/^\s//' >> $TARGETNAME.final.results
 
 echo ""  >> $TARGETNAME.final.results
-totalMisses=`cg_annotate --auto=yes --show=DLmr --sort=DLmr $TARGETNAME.cachegrind.out.*  | sed -n '/Auto-annotation/,$p' | head -6 | tail -1 | awk '{print $1}'`
-echo "Total number of LL cache misses (DLmr): $totalMisses" >> $TARGETNAME.final.results
+totalMisses=`cg_annotate --auto=yes --show=DLmr,DLmw --sort=DLmr,DLmw $TARGETNAME.cachegrind.out.*  | sed -n '/Auto-annotation/,$p' | head -6 | tail -1 | awk '{gsub(",","",$0); print $1 + $2}'`
+echo "Total number of LL cache misses - reads (DLmr) and writes (DLmw): $totalMisses" >> $TARGETNAME.final.results
 echo ""  >> $TARGETNAME.final.results
-cg_annotate --auto=yes --show=DLmr --sort=DLmr $TARGETNAME.cachegrind.out.*  | sed -n '/Auto-annotation/,$p' | sed 1,8d | sed 2d  >> $TARGETNAME.final.results
+cg_annotate --auto=yes --show=DLmr,DLmw --sort=DLmr,DLmw $TARGETNAME.cachegrind.out.*  | sed -n '/Auto-annotation/,$p' | sed 1,8d | sed 2d  >> $TARGETNAME.final.results
 echo ""  >> $TARGETNAME.final.results
 echo "Branch mispredictions" >> $TARGETNAME.final.results
 echo "--------------------" >> $TARGETNAME.final.results
