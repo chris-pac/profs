@@ -57,10 +57,10 @@ content = template.read()
 template.close()
 
 
-content = content.replace('{{thread_names_pin}}', str(thread))
+content = content.replace('{{thread_names_pin}}', str(pin_thread))
 content = content.replace('{{total_time}}', str(runtime))
 content = content.replace('{{lock_time}}', str(locktime))
-content = content.replace('{{thread_names_cache}}', str(thread))
+content = content.replace('{{thread_names_cache}}', str(cache_thread))
 content = content.replace('{{instructions}}', str(instructions))
 content = content.replace('{{read_misses}}', str(read_misses))
 content = content.replace('{{write_misses}}', str(write_misses))

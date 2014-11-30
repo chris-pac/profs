@@ -134,7 +134,7 @@ echo "<h3 id=\"section1link\" style=\"cursor: pointer;color:rgb(124, 181, 236);\
 echo "<div id=\"section1box\" >" >> $HTMLFILENAME
 
 echo "<h5 style=\"margin:0;color:rgb(248, 161, 63);\"><u>   Total execution time</u> </h5>" >> $HTMLFILENAME
-echo "<p style=\"margin-top:6px\">"
+echo "<p style=\"margin-top:6px\">" >>  $HTMLFILENAME
 sed -n '/real/p'  $TARGETNAME.stat.results | cut -f2 >>  $HTMLFILENAME
 echo "</p>" >> $HTMLFILENAME
 
@@ -149,7 +149,7 @@ firstLine=`head -1 $TARGETNAME.pin.results`
 echo "$firstLine" >> $HTMLFILENAME
 sed '1d' $TARGETNAME.pin.results  | sort -k2 -n -r >> $HTMLFILENAME
 echo "</p>" >>  $HTMLFILENAME
-echo "</div> <br>"
+echo "</div> <br>" >>  $HTMLFILENAME
 
 ###Section 2
 echo "<h3 id=\"section2link\" style=\"cursor: pointer;color:rgb(124, 181, 236);\">Section 2 - Cache Information</h3>" >> $HTMLFILENAME
