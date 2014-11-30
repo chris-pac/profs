@@ -95,6 +95,9 @@ grep 'LL ' $TARGETNAME.cachegrind.basic.results | awk '{$1=""; print $0}' | sed 
 
 echo ""  >> $TARGETNAME.final.results
 totalMisses=`cg_annotate --auto=yes --show=DLmr,DLmw --sort=DLmr,DLmw $TARGETNAME.cachegrind.out.*  | sed -n '/Auto-annotation/,$p' | head -6 | tail -1 | awk '{gsub(",","",$0); print $1 + $2}'`
+echo "" >>  $TARGETNAME.final.results
+echo "Thread  Instr  Read Misses   Write Misses" >> $TARGETNAME.final.results
+cat  $TARGETNAME.cachegrind.thread.basic.results >> $TARGETNAME.final.results
 echo "Total number of LL cache misses - reads (DLmr) and writes (DLmw): $totalMisses" >> $TARGETNAME.final.results
 echo ""  >> $TARGETNAME.final.results
 cg_annotate --auto=yes --show=DLmr,DLmw --sort=DLmr,DLmw $TARGETNAME.cachegrind.out.*  | sed -n '/Auto-annotation/,$p' | sed 1,8d | sed 2d  >> $TARGETNAME.final.results
@@ -160,6 +163,9 @@ echo "<h5 style=\"margin:0;color:rgb(248, 161, 63);\"><u>  Cache data</u></h5>" 
 echo "<p style=\"white-space: pre-wrap; \">"  >> $HTMLFILENAME
 grep 'LL ' $TARGETNAME.cachegrind.basic.results | awk '{$1=""; print $0}' | sed 's/^\s//' >> $HTMLFILENAME
 totalMisses=`cg_annotate --auto=yes --show=DLmr,DLmw --sort=DLmr,DLmw $TARGETNAME.cachegrind.out.*  | sed -n '/Auto-annotation/,$p' | head -6 | tail -1 | awk '{gsub(",","",$0); print $1 + $2}'`
+echo "" >> $HTMLFILENAME
+echo "Thread  Instr  Read Misses   Write Misses" >> $TARGETNAME.final.results
+cat  $TARGETNAME.cachegrind.thread.basic.results >> $TARGETNAME.final.results
 echo "" >> $HTMLFILENAME
 echo "Total number of LL cache misses - reads (DLmr) and writes (DLmw): $totalMisses" >> $HTMLFILENAME
 echo "" >> $HTMLFILENAME
