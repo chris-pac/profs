@@ -40,6 +40,10 @@ mv $x $y
 cg_annotate --auto=yes $y > $TARGETNAME.cachegrind.detailed.results
 
 # run valgrind callgrind
+valgrind --tool=callgrind --cache-sim=yes --separate-threads=yes $EXEC "$@" 2> /dev/null
+head -20 callgrind.out.*-* | awk '$1 ~ /summary:|thread:/ { if ($1=="thread:") {x=$2} if ($1=="summary:") {print x,$2,$9,$10}}' | sort -k2 -nr > $TARGETNAME.cachegrind.thread.basic.results
+rm -f callgrind.out.*
+
 valgrind --tool=callgrind --cache-sim=yes $EXEC "$@" 2> $TARGETNAME.callgrind.basic.results
 #valgrind --tool=callgrind $EXEC "$@" 2> $TARGETNAME.callgrind.basic.results
 x=`echo callgrind.out.*`
@@ -110,3 +114,4 @@ sed -n '/index % time/,/Index by function name/p' $TARGETNAME.gprof.results | se
 
 echo "" >> $TARGETNAME.final.results
  
+./charts.py $TARGETNAME
