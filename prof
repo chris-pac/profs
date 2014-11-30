@@ -164,8 +164,8 @@ echo "Total number of LL cache misses - reads (DLmr) and writes (DLmw): $totalMi
 echo "</p>" >> $HTMLFILENAME
 
 echo "<h5 style=\"margin:0;color:rgb(248, 161, 63);\"><u>Branch mispredictions</u></h5>" >> $HTMLFILENAME
-echo "<p style=\"white-space: pre-wrap; margin-top:-10px;\"> " >> $HTMLFILENAME
 cg_annotate --auto=yes --show=DLmr,DLmw --sort=DLmr,DLmw $TARGETNAME.cachegrind.out.*  | sed -n '/Auto-annotation/,$p' | sed 1,8d | sed 2d  >> $HTMLFILENAME
+echo "<p style=\"white-space: pre-wrap; margin-top:-10px;\"> " >> $HTMLFILENAME
 tail -3 $TARGETNAME.cachegrind.basic.results |  awk '{$1=""; print $0}' | sed 's/^\s//' >> $HTMLFILENAME
 echo "</p></div><br>"  >> $HTMLFILENAME
 
@@ -177,15 +177,16 @@ echo "<h5 style=\"margin:0;color:rgb(248, 161, 63);\"><u>Call Graph Info - Cache
 echo "<p style=\"white-space: pre-wrap; margin-top:-10px;\">" >> $HTMLFILENAME
 totalInstr=`callgrind_annotate --tree=both --show=Ir,DLmr --sort=DLmr,Ir $TARGETNAME.callgrind.out.* | sed -n '/Auto-annotation/,$p' | sed 1d | head -6 | tail -2 | awk '{print $1}'`
 echo "Total number of instructions (Ir): $totalInstr" >> $HTMLFILENAME
+echo "" >> $HTMLFILENAME
 callgrind_annotate --tree=both --show=Ir,DLmr --sort=DLmr,Ir $TARGETNAME.callgrind.out.* | sed -n '/Auto-annotation/,$p' | sed 1,8d | sed 2d | sed 3d | sed 2d  >> $HTMLFILENAME
 echo "</p>" >> $HTMLFILENAME
 
 echo "<h5 style=\"margin:0;color:rgb(248, 161, 63);\"><u>Call Graph Info - Functions</u></h5>" >> $HTMLFILENAME
 echo "<p style=\"white-space: pre-wrap;margin-top:-10px;\">" >> $HTMLFILENAME
-echo "Flat Profile:" >> $HTMLFILENAME
+echo "<u>Flat Profile:</u>" >> $HTMLFILENAME
 echo "" >> $HTMLFILENAME
 sed -n '/cumulative/,/Call graph/p' $TARGETNAME.gprof.results | sed \$d >> $HTMLFILENAME
-echo "Call Graph:" >> $HTMLFILENAME
+echo "<u>Call Graph:</u>" >> $HTMLFILENAME
 echo "" >> $HTMLFILENAME
 sed -n '/index % time/,/Index by function name/p' $TARGETNAME.gprof.results | sed \$d >> $HTMLFILENAME
 echo "</p></div>" >> $HTMLFILENAME
