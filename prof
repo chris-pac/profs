@@ -126,4 +126,68 @@ sed -n '/index % time/,/Index by function name/p' $TARGETNAME.gprof.results | se
 
 echo "" >> $TARGETNAME.final.results
  
+ #Parsing HTML output
+ HTMLFILENAME=$TARGETNAME.temp.results.html
+
+###Section 1
+echo "<h3 id=\"section1link\" style=\"cursor: pointer;color:rgb(124, 181, 236);\">Section 1 - Summary</h3>" >> $HTMLFILENAME
+echo "<div id=\"section1box\" >" >> $HTMLFILENAME
+
+echo "<h5 style=\"margin:0;color:rgb(248, 161, 63);\"><u>   Total execution time</u> </h5>" >> $HTMLFILENAME
+echo "<p style=\"margin-top:6px\">"
+sed -n '/real/p'  $TARGETNAME.stat.results | cut -f2 >>  $HTMLFILENAME
+echo "</p>" >> $HTMLFILENAME
+
+echo "<h5 style=\"margin:0;color:rgb(248, 161, 63);\"><u>Total number of instructions</u></h5>" >>  $HTMLFILENAME
+echo "<p style=\"margin-top:6px\">" >> $HTMLFILENAME
+grep 'I   refs:' $TARGETNAME.cachegrind.basic.results | awk '{print $4}' >> $HTMLFILENAME
+echo "</p>" >>  $HTMLFILENAME
+
+echo "<h5 style=\"margin:0;color:rgb(248, 161, 63);\"><u>Thread execution time</u></h5>" >>  $HTMLFILENAME
+echo "<p style=\"margin-top:6px\">" >> $HTMLFILENAME
+firstLine=`head -1 $TARGETNAME.pin.results`
+echo "$firstLine" >> $HTMLFILENAME
+sed '1d' $TARGETNAME.pin.results  | sort -k2 -n -r >> $HTMLFILENAME
+echo "</p>" >>  $HTMLFILENAME
+echo "</div> <br>"
+
+###Section 2
+echo "<h3 id=\"section2link\" style=\"cursor: pointer;color:rgb(124, 181, 236);\">Section 2 - Cache Information</h3>" >> $HTMLFILENAME
+echo "<div id=\"section2box\">" >> $HTMLFILENAME
+
+
+echo "<h5 style=\"margin:0;color:rgb(248, 161, 63);\"><u>  Cache data</u></h5>" >> $HTMLFILENAME
+echo "<p style=\"white-space: pre-wrap; \">"  >> $HTMLFILENAME
+grep 'LL ' $TARGETNAME.cachegrind.basic.results | awk '{$1=""; print $0}' | sed 's/^\s//' >> $HTMLFILENAME
+totalMisses=`cg_annotate --auto=yes --show=DLmr,DLmw --sort=DLmr,DLmw $TARGETNAME.cachegrind.out.*  | sed -n '/Auto-annotation/,$p' | head -6 | tail -1 | awk '{gsub(",","",$0); print $1 + $2}'`
+echo "Total number of LL cache misses - reads (DLmr) and writes (DLmw): $totalMisses" >> $HTMLFILENAME
+echo "</p>" >> $HTMLFILENAME
+
+echo "<h5 style=\"margin:0;color:rgb(248, 161, 63);\"><u>Branch mispredictions</u></h5>" >> $HTMLFILENAME
+cg_annotate --auto=yes --show=DLmr,DLmw --sort=DLmr,DLmw $TARGETNAME.cachegrind.out.*  | sed -n '/Auto-annotation/,$p' | sed 1,8d | sed 2d  >> $HTMLFILENAME
+tail -3 $TARGETNAME.cachegrind.basic.results |  awk '{$1=""; print $0}' | sed 's/^\s//' >> $HTMLFILENAME
+echo "</p></div><br>"  >> $HTMLFILENAME
+
+###Section 3
+echo "<h3 id=\"section3link\" style=\"cursor: pointer;color:rgb(124, 181, 236);\">Section 3 - Call Graph Details</h3>" >> $HTMLFILENAME
+echo "<div id=\"section3box\">" >> $HTMLFILENAME
+ 
+echo "<h5 style=\"margin:0;color:rgb(248, 161, 63);\"><u>Call Graph Info - Cache</u></h5>" >> $HTMLFILENAME
+echo "<p style=\"white-space: pre-wrap; margin-top:-10px;\">" >> $HTMLFILENAME
+totalInstr=`callgrind_annotate --tree=both --show=Ir,DLmr --sort=DLmr,Ir $TARGETNAME.callgrind.out.* | sed -n '/Auto-annotation/,$p' | sed 1d | head -6 | tail -2 | awk '{print $1}'`
+echo "Total number of instructions (Ir): $totalInstr" >> $HTMLFILENAME
+callgrind_annotate --tree=both --show=Ir,DLmr --sort=DLmr,Ir $TARGETNAME.callgrind.out.* | sed -n '/Auto-annotation/,$p' | sed 1,8d | sed 2d | sed 3d | sed 2d  >> $HTMLFILENAME
+echo "</p>" >> $HTMLFILENAME
+
+echo "<h5 style=\"margin:0;color:rgb(248, 161, 63);\"><u>Call Graph Info - Functions</u></h5>" >> $HTMLFILENAME
+echo "<p style=\"white-space: pre-wrap;margin-top:-10px;\">" >> $HTMLFILENAME
+echo "Flat Profile:" >> $HTMLFILENAME
+echo "" >> $HTMLFILENAME
+sed -n '/cumulative/,/Call graph/p' $TARGETNAME.gprof.results | sed \$d >> $HTMLFILENAME
+echo "Call Graph:" >> $HTMLFILENAME
+echo "" >> $HTMLFILENAME
+sed -n '/index % time/,/Index by function name/p' $TARGETNAME.gprof.results | sed \$d >> $HTMLFILENAME
+echo "</p></div>" >> $HTMLFILENAME
+
+
 ./charts.py $TARGETNAME
