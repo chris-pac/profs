@@ -160,11 +160,13 @@ echo "<h5 style=\"margin:0;color:rgb(248, 161, 63);\"><u>  Cache data</u></h5>" 
 echo "<p style=\"white-space: pre-wrap; \">"  >> $HTMLFILENAME
 grep 'LL ' $TARGETNAME.cachegrind.basic.results | awk '{$1=""; print $0}' | sed 's/^\s//' >> $HTMLFILENAME
 totalMisses=`cg_annotate --auto=yes --show=DLmr,DLmw --sort=DLmr,DLmw $TARGETNAME.cachegrind.out.*  | sed -n '/Auto-annotation/,$p' | head -6 | tail -1 | awk '{gsub(",","",$0); print $1 + $2}'`
+echo "" >> $HTMLFILENAME
 echo "Total number of LL cache misses - reads (DLmr) and writes (DLmw): $totalMisses" >> $HTMLFILENAME
+echo "" >> $HTMLFILENAME
+cg_annotate --auto=yes --show=DLmr,DLmw --sort=DLmr,DLmw $TARGETNAME.cachegrind.out.*  | sed -n '/Auto-annotation/,$p' | sed 1,8d | sed 2d  >> $HTMLFILENAME
 echo "</p>" >> $HTMLFILENAME
 
 echo "<h5 style=\"margin:0;color:rgb(248, 161, 63);\"><u>Branch mispredictions</u></h5>" >> $HTMLFILENAME
-cg_annotate --auto=yes --show=DLmr,DLmw --sort=DLmr,DLmw $TARGETNAME.cachegrind.out.*  | sed -n '/Auto-annotation/,$p' | sed 1,8d | sed 2d  >> $HTMLFILENAME
 echo "<p style=\"white-space: pre-wrap; margin-top:-10px;\"> " >> $HTMLFILENAME
 tail -3 $TARGETNAME.cachegrind.basic.results |  awk '{$1=""; print $0}' | sed 's/^\s//' >> $HTMLFILENAME
 echo "</p></div><br>"  >> $HTMLFILENAME
