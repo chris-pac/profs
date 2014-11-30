@@ -6,7 +6,7 @@ targetName=sys.argv[1]
 
 pinFile=targetName + '.pin.results'
 cacheFile=targetName + '.cachegrind.thread.basic.results'
-reportFile=targetName+'.results.html'
+reportFile=targetName+'.temp.html'
 
 ##FILE1###
 file1 = open(pinFile,'r')
