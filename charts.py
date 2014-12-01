@@ -57,6 +57,7 @@ content = template.read()
 template.close()
 
 
+content = content.replace('{{target_name}}', targetName)
 content = content.replace('{{thread_names_pin}}', str(pin_thread))
 content = content.replace('{{total_time}}', str(runtime))
 content = content.replace('{{lock_time}}', str(locktime))

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # sets up environment and calls prof script with the right arguments; ie. batch file
-NTHREADS=1
+NTHREADS=7
 
 PIN_ROOT=$HOME/multicore/project/pin-2.14-67254-gcc.4.4.7-linux
 # PATH=$PIN_ROOT:$HOME/multicore/project/valgrind-3.10.1/coregrind:$PATH
@@ -19,52 +19,76 @@ PTHREADS_BIN=/inst/amd64-linux.gcc-pthreads-g/bin
 PTHREADS_GP_BIN=/inst/amd64-linux.gcc-pthreads-gp/bin
 
 INPUT_DIR=/inputs
-INPUT_FILE=in_4.txt
-
-function parsec_run(){
-    ./prof "$TARGETNAME" "$PARSEC_DIR/${TARGETNAME}${PTHREADS_GP_BIN}/$TARGETNAME" \
-    "$PARSEC_DIR/${TARGETNAME}${PTHREADS_BIN}/$TARGETNAME" \
-    $NTHREADS "$PARSEC_DIR/${TARGETNAME}${INPUT_DIR}/$INPUT_FILE" $TARGETNAME.out.results
-}
 
 if [[ $1 == "all" || $1 == "blackscholes" ]]
 then
     TARGETNAME="blackscholes"
     echo "starting $TARGETNAME"
-    parsec_run
+    # input to blackscholes follows the simlarge parsec format: 65,536 options to price
+
+    ./prof "$TARGETNAME" "$PARSEC_DIR/${TARGETNAME}${PTHREADS_GP_BIN}/$TARGETNAME" \
+    "$PARSEC_DIR/${TARGETNAME}${PTHREADS_BIN}/$TARGETNAME" \
+    $NTHREADS /home/ff648/parsec-2.1/pkgs/apps/blackscholes/inputs/in_64K.txt $TARGETNAME.out.results
+
+    echo "end $TARGETNAME"
 fi
 
 if [[ $1 == "all" || $1 == "bodytrack" ]]
 then
     TARGETNAME="bodytrack"
     echo "starting $TARGETNAME"
-    parsec_run
+    # input to bodytrack follows the simlarge parsec format
+    # dataset=sequenceB_4, cameras=4, frames=4, particles=4000, layers=5, thread model=2 (posix), threads=4
+ 
+    ./prof "$TARGETNAME" "$PARSEC_DIR/${TARGETNAME}${PTHREADS_GP_BIN}/$TARGETNAME" \
+    "$PARSEC_DIR/${TARGETNAME}${PTHREADS_BIN}/$TARGETNAME" \
+    /home/ff648/parsec-2.1/pkgs/apps/bodytrack/inputs/sequenceB_4 4 4 4000 5 2 4
+
+    echo "end $TARGETNAME"
 fi
 
-if [[ $1 == "all" || $1 == "facesim" ]]
-then
-    TARGETNAME="facesim"
-    echo "starting $TARGETNAME"
-    parsec_run
-fi
+#if [[ $1 == "all" || $1 == "facesim" ]]
+#then
+#    TARGETNAME="facesim"
+#    echo "starting $TARGETNAME"
+#    {{ NO HD SPACE }}
+#    echo "end $TARGETNAME"
+#fi
 
 if [[ $1 == "all" || $1 == "ferret" ]]
 then
     TARGETNAME="ferret"
     echo "starting $TARGETNAME"
-    parsec_run
+    # input to ferret follows the smilarge parsec format
+    # database=corel, table=lsh, query=queries, top K=10, depth=20, numthreads=10    
+
+    ./prof "$TARGETNAME" "$PARSEC_DIR/${TARGETNAME}${PTHREADS_GP_BIN}/$TARGETNAME" \
+    "$PARSEC_DIR/${TARGETNAME}${PTHREADS_BIN}/$TARGETNAME" \
+    /home/ff648/parsec-2.1/pkgs/apps/ferret/inputs/corel lsh /home/ff648/parsec-2.1/pkgs/apps/ferret/inputs/queries \
+    10 20 10 $TARGETNAME.out.results 
+
+    echo "end $TARGETNAME"
 fi
 
 if [[ $1 == "all" || $1 == "raytrace" ]]
 then
     TARGETNAME="raytrace"
     echo "starting $TARGETNAME"
-    parsec_run
+    # input to raytrace follows the simlarge parsec format with the exception that we render 20 frames not 3
+
+    ./prof "$TARGETNAME" "$PARSEC_DIR/${TARGETNAME}${PTHREADS_GP_BIN}/rtview" \
+    "$PARSEC_DIR/${TARGETNAME}${PTHREADS_BIN}/rtview" \
+    /home/ff648/parsec-2.1/pkgs/apps/raytrace/inputs/happy_buddha.obj -nodisplay -automove -nthreads 5 -frames 20 -res 1920 1080
+
+    echo "end $TARGETNAME"
 fi
 
-if [[ $1 == "all" || $1 == "tsm" ]]
+if [[ $1 == "all" || $1 == "tsp" ]]
 then
-    TARGETNAME="tsm"
+    TARGETNAME="tsp"
     echo "starting $TARGETNAME"
-    ./prof "$TARGETNAME" "$HOME/multicore/Lab3/parallel-gp" "$HOME/multicore/Lab3/parallel" "$HOME/multicore/Lab3/cities10.txt" 4
+    #./prof "$TARGETNAME" "$HOME/multicore/Lab3/17parallel-pg" "$HOME/multicore/Lab3/17parallel-g" "$HOME/multicore/Lab3/cities12.txt" 7
+    ./prof "$TARGETNAME" "$HOME/multicore/Lab3/17parallel-pg" "$HOME/multicore/Lab3/17parallel-g" "$HOME/multicore/Lab3/cities8.txt" 3
+    #./prof "$TARGETNAME" "/home/cpp270/shared/final-pg" "/home/cpp270/shared/final2" "$HOME/multicore/Lab3/cities10.txt" 4
+    echo "end $TARGETNAME"
 fi
