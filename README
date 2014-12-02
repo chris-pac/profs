@@ -1,0 +1,71 @@
+README
+
+1.) Overview
+
+prof is a profiling and analysis tool that gathers relevant data from open-source profiling 
+programs to help users understand the behavior of their applications. 
+prof produces two files and a directory. 
+
+<target-name>.html 		==> contains summary information and interactive charts
+<target-name>.results		==> contains flat summary information
+<target-name> directory		==> contains files that were produced while running prof
+
+2.) Requirements
+
+prof has been successfully tested on the following system:
+
+	- Linux/x86_64
+
+prof requires that the following programs be installed and included in the PATH:
+			tested with these versions
+	- valgrind	[valgrind-3.8.1]
+	- pin		[pin-2.14-67254-gcc.4.4.7-linux]
+	- gprof		[GNU gprof version 2.20.51.0.2-5.42.el6 20100205]
+
+PIN_ROOT environment variable needs to be set to point to the location of Pin kit directory.
+
+3.) How to build prof
+
+prof is a scrip and does not require building
+
+Our ThreadTimes Pin tool however, does require building:
+	copy: ThreadTimes.cpp and the makefile.rules into $PIN_ROOT/source/tools/MyPinTool/ directory
+	run: make
+
+4.) How to run prof
+
+./prof <target-name> <binary-pg> <binary(-g)> <program-args>
+
+
+Please, perform the following actions to run prof tool:
+	1. compile source code using the -g option
+	2. compile source code using the -pg options
+	3. set PIN_ROOT and export PIN_ROOT
+
+5.) Structure/Files
+	.
+	prof
+	template.html
+	charts.py
+	prof-run
+	gprof-helper.c
+	README
+
+5.) Examples and Explanation
+
+In our analysis we use three main programs: gprof, valgind, pin. Please make sure these programs are 
+installed before ruining our analysis tool.
+
+We provide a batch script, called prof-run, that runs our profiling and analysis script prof. 
+prof-run is an example of what environment variables need to be set and what the input to the prof script looks like. 
+In order to make prof-run run successfully please modify all necessary variables and install and 
+compile any desired PARSEC programs with -g and -pg options.
+
+In order to build the ThreadTimes pin tool please copy the source file, ThreadTimes.cpp, and the makefile.rules 
+into source/tools/MyPinTool/ directory, situated in main Pin kit directory, and run make.
+ 
+Our main script prof takes as input target name, path to binary built with -pg, path to binary 
+(should be built with -g in order to extract additional information) and all command arguments necessary to run the binaries. 
+
+The scrip produces flat summary file, interactive chart and summary file, and a directory with files containing detailed output while running prof.
+
