@@ -14,13 +14,13 @@ prof produces two files and a directory.
 
 prof has been successfully tested on the following system:
 
-		- Linux/x86_64
+	- Linux/x86_64
 
 prof requires that the following programs be installed and included in the PATH:
-				tested with these versions
-		- valgrind	[valgrind-3.8.1]
-		- pin		[pin-2.14-67254-gcc.4.4.7-linux]
-		- gprof		[GNU gprof version 2.20.51.0.2-5.42.el6 20100205]
+			tested with these versions
+	- valgrind	[valgrind-3.8.1]
+	- pin		[pin-2.14-67254-gcc.4.4.7-linux]
+	- gprof		[GNU gprof version 2.20.51.0.2-5.42.el6 20100205]
 
 PIN_ROOT environment variable needs to be set to point to the location of Pin kit directory.
 
