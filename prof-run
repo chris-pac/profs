@@ -87,8 +87,9 @@ if [[ $1 == "all" || $1 == "tsp" ]]
 then
     TARGETNAME="tsp"
     echo "starting $TARGETNAME"
+    ./prof "$TARGETNAME" "$HOME/multicore/Lab3/17sequential-pg" "$HOME/multicore/Lab3/17sequential-g" "$HOME/multicore/Lab3/cities9.txt" 7
     #./prof "$TARGETNAME" "$HOME/multicore/Lab3/17parallel-pg" "$HOME/multicore/Lab3/17parallel-g" "$HOME/multicore/Lab3/cities12.txt" 7
-    ./prof "$TARGETNAME" "$HOME/multicore/Lab3/17parallel-pg" "$HOME/multicore/Lab3/17parallel-g" "$HOME/multicore/Lab3/cities8.txt" 3
+    #./prof "$TARGETNAME" "$HOME/multicore/Lab3/17parallel-pg" "$HOME/multicore/Lab3/17parallel-g" "$HOME/multicore/Lab3/cities8.txt" 3
     #./prof "$TARGETNAME" "/home/cpp270/shared/final-pg" "/home/cpp270/shared/final2" "$HOME/multicore/Lab3/cities10.txt" 4
     echo "end $TARGETNAME"
 fi
